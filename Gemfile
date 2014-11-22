@@ -99,6 +99,8 @@ end
 
 group :development do
   gem 'capistrano', '~> 2.0', :require => false
+  gem 'capistrano-sidekiq'
+  gem 'rvm-capistrano'
 
   # better errors
   gem 'better_errors'
@@ -127,6 +129,7 @@ end
 
 group :heroku, :production do
   gem 'unicorn', :require => false
+  gem 'newrelic_rpm'
 end
 
 gem 'execjs'
