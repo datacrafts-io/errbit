@@ -1,53 +1,43 @@
 require 'recurse'
 
-class Notice < ActiveRecord::Base
-  include Authority::Abilities
-  include NoticeRepository
+class Notice
+  MESSAGE_LENGTH_LIMIT = 1000
 
-  serialize :server_environment, Hash
-  serialize :request, Hash
-  serialize :notifier, Hash
-  serialize :user_attributes, Hash
-  serialize :current_user, Hash
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
-  delegate :lines, :to => :backtrace, :prefix => true
-  delegate :app, :to => :problem
+  field :message
+  field :server_environment, type: Hash
+  field :request, type: Hash
+  field :notifier, type: Hash
+  field :user_attributes, type: Hash
+  field :framework
+  field :error_class
+  delegate :lines, to: :backtrace, prefix: true
+  delegate :problem, to: :err
 
-  belongs_to :problem
-  belongs_to :backtrace
+  belongs_to :app
+  belongs_to :err
+  belongs_to :backtrace, index: true
 
-  counter_culture :problem
-
-  after_commit :unresolve_problem, on: :create
-  after_commit :cache_attributes_on_problem, on: :create
-  after_commit :increase_in_distributions, on: :create
-  after_commit :decrease_in_distributions, on: :destroy
+  index(created_at: 1)
+  index(err_id: 1, created_at: 1, _id: 1)
 
   before_save :sanitize
-  after_initialize :default_values
+  before_destroy :problem_recache
 
-  validates_presence_of :backtrace, :server_environment, :notifier
+  validates :backtrace_id, :server_environment, :notifier, presence: true
 
-  def default_values
-    if self.new_record?
-      self.server_environment ||= Hash.new
-      self.request ||= Hash.new
-      self.notifier ||= Hash.new
-      self.user_attributes ||= Hash.new
-      self.current_user ||= Hash.new
-    end
-  end
+  scope :ordered, -> { order_by(:created_at.asc) }
+  scope :reverse_ordered, -> { order_by(:created_at.desc) }
+  scope :for_errs, lambda { |errs|
+    where(:err_id.in => errs.all.map(&:id))
+  }
 
-  def message_signature
-    m = message.clone
-    m.gsub!(/".+?"/, '"%STR%"')
-    m.gsub!(/'.+?'/, '\'%STR%\'')
-    m.gsub!(/\h{8}-\h{4}-\h{4}-\h{4}-\h{12}/, '%UUID%')
-    m.gsub!(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/, '%IP%')
-    m.gsub!(/0x\h+/, '%HEX%')
-    m.gsub!(/\h{7,}/, '%HEXSTR%')
-    m.gsub!(/\d+/, '%NUM%')
-    m.truncate(150)
+  # Overwrite the default setter to make sure the message length is no longer
+  # than the limit we impose
+  def message=(m)
+    super(m.is_a?(String) ? m[0, MESSAGE_LENGTH_LIMIT] : m)
   end
 
   def user_agent
@@ -64,7 +54,8 @@ class Notice < ActiveRecord::Base
   end
 
   def environment_name
-    server_environment['server-environment'] || server_environment['environment-name']
+    n = server_environment['server-environment'] || server_environment['environment-name']
+    n.blank? ? 'development' : n
   end
 
   def component
@@ -83,9 +74,6 @@ class Notice < ActiveRecord::Base
 
   def request
     super || {}
-  rescue Psych::SyntaxError
-    # some notices may have incorrect yaml inside request field
-    {}
   end
 
   def url
@@ -94,13 +82,25 @@ class Notice < ActiveRecord::Base
 
   def host
     uri = url && URI.parse(url)
-    uri.blank? ? "N/A" : uri.host
+    uri && uri.host || "N/A"
   rescue URI::InvalidURIError
     "N/A"
   end
 
+  def to_curl
+    return "N/A" if url.blank?
+    headers = %w(Accept Accept-Encoding Accept-Language Cookie Referer User-Agent).each_with_object([]) do |name, h|
+      if (value = env_vars["HTTP_#{name.underscore.upcase}"])
+        h << "-H '#{name}: #{value}'"
+      end
+    end
+
+    "curl -X #{env_vars['REQUEST_METHOD'] || 'GET'} #{headers.join(' ')} #{url}"
+  end
+
   def env_vars
-    request['cgi-data'] || {}
+    vars = request['cgi-data']
+    vars.is_a?(Hash) ? vars : {}
   end
 
   def params
@@ -111,76 +111,40 @@ class Notice < ActiveRecord::Base
     request['session'] || {}
   end
 
-  def in_app_backtrace_lines
-    backtrace_lines.in_app
-  end
-
-  def similar_count
-    problem.notices_count
-  end
-
-  def emailable?
-    app.email_at_notices.include?(problem.notices_count_since_unresolve)
-  end
-
-  def should_email?
-    app.emailable? && emailable?
-  end
-
-  def should_notify?
-    app.notification_service_configured? &&
-    (app.notification_service.notify_at_notices.include?(0) || app.notification_service.notify_at_notices.include?(problem.notices_count_since_unresolve))
-  end
-
   ##
   # TODO: Move on decorator maybe
   #
   def project_root
-    if server_environment
-      server_environment['project-root'] || ''
-    end
+    server_environment['project-root'] || '' if server_environment
   end
 
   def app_version
-    if server_environment
-      server_environment['app-version'] || ''
-    end
+    server_environment['app-version'] || '' if server_environment
   end
 
-  protected
-  def increase_in_distributions
-    problem.increase_in_message_distribution message_signature
-    problem.increase_in_host_distribution host
-    problem.increase_in_user_agent_distribution user_agent_string
+  # filter memory addresses out of object strings
+  # example: "#<Object:0x007fa2b33d9458>" becomes "#<Object>"
+  def filtered_message
+    message.gsub(/(#<.+?):[0-9a-f]x[0-9a-f]+(>)/, '\1\2')
   end
 
-  def decrease_in_distributions
-    problem.decrease_in_message_distribution message_signature
-    problem.decrease_in_host_distribution host
-    problem.decrease_in_user_agent_distribution user_agent_string
-  end
+protected
 
-  def unresolve_problem
-    return if problem.unresolved?
-    problem.unresolve!
-  end
-
-  def cache_attributes_on_problem
-    ProblemUpdaterCache.new(problem, self).update
+  def problem_recache
+    problem.uncache_notice(self)
   end
 
   def sanitize
     [:server_environment, :request, :notifier].each do |h|
-      send("#{h}=",sanitize_hash(send(h)))
+      send("#{h}=", sanitize_hash(send(h)))
     end
   end
 
-
-  def sanitize_hash(h)
-    h.recurse do
-      |h| h.inject({}) do |h,(k,v)|
+  def sanitize_hash(hash)
+    hash.recurse do |recurse_hash|
+      recurse_hash.inject({}) do |h, (k, v)|
         if k.is_a?(String)
-          h[k.gsub(/\./,'&#46;').gsub(/^\$/,'&#36;')] = v
+          h[k.gsub(/\./, '&#46;').gsub(/^\$/, '&#36;')] = v
         else
           h[k] = v
         end
@@ -189,4 +153,3 @@ class Notice < ActiveRecord::Base
     end
   end
 end
-

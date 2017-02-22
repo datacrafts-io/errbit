@@ -1,69 +1,56 @@
 = errors_for app
 
 %div.required
-  = f.label :name
+  = f.label :name, t('.name')
   = f.text_field :name
 
 - unless app.new_record?
   %div
-    %label Api Key
+    %label= t('.api_key')
     %span= app.api_key
     = link_to t('.regenerate_api_key'), regenerate_api_key_app_path(app), :class => 'button', :method => 'post'
 %div
-  = f.label :repository_branch
+  = f.label :repository_branch, t('.repository_branch')
   = f.text_field :repository_branch, :placeholder => "master"
 %div
-  = f.label :repo_url
-  = f.text_field :repo_url, :placeholder => "https://github.com/errbit/errbit"
+  = f.label :github_repo, t('.github_repo')
+  = f.text_field :github_repo, :placeholder => "errbit/errbit from https://github.com/errbit/errbit"
 %div
-  = f.label :asset_host
-  %em Used to generate links for JavaScript errors
-  = f.text_field :asset_host, :placeholder => "e.g. https://assets.example.com"
+  = f.label :bitbucket_repo, t('.bitbucket_repo')
+  = f.text_field :bitbucket_repo, :placeholder => "errbit/errbit from https://bitbucket.org/errbit/errbit"
+%div
+  = f.label :asset_host, t('.asset_host')
+  %em= t('.asset_host_help')
+  = f.text_field :asset_host, :placeholder => t('.asset_host_placeholder')
+%div
+  = f.label :current_app_version, t('.latest_app_version')
+  %em= t('.latest_app_version_help')
+  = f.text_field :current_app_version, :placeholder => t('.latest_app_version_placeholder')
+%fieldset
+  %legend= t('.notifications')
+  .checkbox
+    = f.check_box :notify_on_errs, 'data-show-when-checked' => '.email_at_notices_nested'
+    = f.label :notify_on_errs, t('.notify_on_errors')
+  - if Errbit::Config.per_app_email_at_notices
+    %div.email_at_notices_nested{:style => app_decorate.notify_err_display}
+      .field-helpertext Send a notification every
+      = f.text_field :email_at_notices, :value => app_decorate.email_at_notices
+      .field-helpertext times an error occurs (comma separated).
 
 %fieldset
-  %legend Notifications
-  %div.checkbox
-    = f.check_box :notify_on_errs, 'data-show-when-checked' => '.email_at_notices_nested'
-    = f.label :notify_on_errs, 'Notify on errors'
-  - if Errbit::Config.per_app_email_at_notices
-    %div.email_at_notices_nested{:style => f.object.notify_on_errs ? '' : 'display: none;'}
-      .field-helpertext Send a notification every
-      = f.text_field :email_at_notices, :value => f.object.email_at_notices.join(", ")
-      .field-helpertext times an error occurs (comma separated).
-  %div.checkbox
-    = f.check_box :notify_on_deploys
-    = f.label :notify_on_deploys, 'Notify on deploys'
-- if need_display_notify_all_users_field?
-  %div.checkbox
-    = f.check_box :notify_all_users
-    = f.label :notify_all_users, 'Send notifications to all users'
+  %legend= t('notice_fingerprinter.title')
+  %p= t('notice_fingerprinter.text')
+  .checkbox
+    = f.check_box :use_site_fingerprinter, 'data-hide-when-checked' => '.custom_notice_fingerprinter'
+    = f.label :use_site_fingerprinter, t('.use_site_fingerprinter')
 
+    %div.custom_notice_fingerprinter{:style => app_decorate.custom_notice_fingerprinter_style}
+      = render 'shared/notice_fingerprinter', :f => f
 
-%fieldset.watchers.nested-wrapper{:style => f.object.notify_all_users ? 'display: none;' : ''}
-  %legend Watchers
-  = f.fields_for :watchers do |w|
-    %div.watcher.nested
-      %div.choose
-        = w.radio_button :watcher_type, :user
-        = label_tag :watcher_type_user, 'User', :for => label_for_attr(w, 'watcher_type_user')
-        = w.radio_button :watcher_type, :email
-        = label_tag :watcher_type_email, 'Email Address', :for => label_for_attr(w, 'watcher_type_email')
-      %div.watcher_params.user{:class => w.object.email.blank? ? 'chosen' : nil}
-        = w.select :user_id, users_for_select, :include_blank => '-- Select a User --'
-      %div.watcher_params.email{:class => w.object.email.present? ? 'chosen' : nil}
-        = w.text_field :email
-        = t 'form_help.use_corporate_email' if Errbit::Config.corporate_emails
-      .checkbox
-        = w.check_box :watching_errors
-        = w.label :watching_errors
-      .checkbox
-        = w.check_box :watching_deploys
-        = w.label :watching_deploys
 
 %div.checkbox
-  = f.check_box :resolve_errs_on_deploy
-  = f.label :resolve_errs_on_deploy, 'Resolve errs on deploy'
+  = f.check_box :notify_all_users
+  = f.label :notify_all_users, t('.notify_all_users')
 
 = render "issue_tracker_fields", :f => f
 = render "service_notification_fields", :f => f
-

@@ -1,25 +1,28 @@
-class Backtrace < ActiveRecord::Base
-  include BacktraceRepository
+class Backtrace
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
-  has_many :notices
-  has_one :notice
+  IN_APP_PATH = %r{^\[PROJECT_ROOT\](?!(\/vendor))/?}
+  GEMS_PATH = %r{\[GEM_ROOT\]\/gems\/([^\/]+)}
 
-  has_many :lines, -> { order("created_at ASC") }, class_name: 'BacktraceLine'
+  field :fingerprint
+  field :lines
 
-  after_initialize :generate_fingerprint, :if => :new_record?
+  index fingerprint: 1
 
-  delegate :app, :to => :notice
+  def self.find_or_create(lines)
+    fingerprint = generate_fingerprint(lines)
 
-  def raw=(raw)
-    return if raw.compact.blank?
-    raw.compact.each do |raw_line|
-      lines << BacktraceLine.new(BacktraceLineNormalizer.new(raw_line).call)
-    end
+    where(fingerprint: fingerprint).find_one_and_update(
+      { '$setOnInsert' => { fingerprint: fingerprint, lines: lines } },
+      return_document: :after, upsert: true)
   end
 
-  private
-  def generate_fingerprint
-    self.fingerprint = Digest::SHA1.hexdigest(lines.map(&:to_s).join)
+  def self.generate_fingerprint(lines)
+    Digest::SHA1.hexdigest(lines.map(&:to_s).join)
   end
 
+  private def generate_fingerprint
+    self.fingerprint = self.class.generate_fingerprint(lines)
+  end
 end

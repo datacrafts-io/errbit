@@ -4,41 +4,48 @@ require Rails.root.join('config/routes.rb')
 
 class Mailer < ActionMailer::Base
   helper ApplicationHelper
-  helper BacktraceLineHelper
-  helper RepositoryHelper
-  helper ChangesHelper
 
-  default :from => Errbit::Config.email_from
+  default :from                      => Errbit::Config.email_from,
+          'X-Errbit-Host'            => Errbit::Config.host,
+          'X-Mailer'                 => 'Errbit',
+          'X-Auto-Response-Suppress' => 'OOF, AutoReply',
+          'Precedence'               => 'bulk',
+          'Auto-Submitted'           => 'auto-generated'
 
-  def err_notification(notice)
-    @notice   = notice
-    @app      = notice.app
+  def err_notification(error_report)
+    @notice   = NoticeDecorator.new error_report.notice
+    @app      = AppDecorator.new error_report.app
 
-    count = @notice.similar_count
+    count = error_report.problem.notices_count
     count = count > 1 ? "(#{count}) " : ""
 
-    mail :to      => @app.error_recipients,
-         :subject => "#{count}[#{@app.name}][#{@notice.environment_name}] #{@notice.message.truncate(50)}"
-  end
+    errbit_headers 'App'         => @app.name,
+                   'Environment' => @notice.environment_name,
+                   'Error-Id'    => @notice.err_id
 
-  def deploy_notification(deploy)
-    @deploy   = deploy
-    @app  = deploy.app
-
-    mail :to       => @app.deploy_recipients,
-         :subject  => "[#{@app.name}] Deployed to #{@deploy.environment} by #{@deploy.username}"
+    mail to:      @app.notification_recipients,
+         subject: "#{count}[#{@app.name}][#{@notice.environment_name}] #{@notice.message.truncate(50)}"
   end
 
   def comment_notification(comment)
     @comment  = comment
     @user     = comment.user
-    @problem  = comment.problem
+    @problem  = ProblemDecorator.new comment.err
     @notice   = @problem.notices.first
     @app      = @problem.app
 
     recipients = @comment.notification_recipients
 
-    mail :to      => recipients,
-         :subject => "#{@user.name} commented on [#{@app.name}][#{@notice.environment_name}] #{@notice.message.truncate(50)}"
+    errbit_headers 'App'            => @app.name,
+                   'Environment'    => @notice.environment_name,
+                   'Problem-Id'     => @problem.id,
+                   'Comment-Author' => @user.name
+
+    mail to:      recipients,
+         subject: "#{@user.name} commented on [#{@app.name}][#{@notice.environment_name}] #{@notice.message.truncate(50)}"
+  end
+
+  private def errbit_headers(header)
+    header.each { |key, value| headers["X-Errbit-#{key}"] = value.to_s }
   end
 end

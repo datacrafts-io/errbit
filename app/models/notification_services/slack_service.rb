@@ -1,41 +1,84 @@
 class NotificationServices::SlackService < NotificationService
-  Label = "slack"
-  Fields += [
-    [:subdomain, {
-      :placeholder => 'subdomain',
-      :label => 'Subdomain portion for Slack service'
-    }],
-    [:api_token, {
-      :placeholder => 'Slack Integration Token',
-      :label => 'Token'
+  CHANNEL_NAME_REGEXP = /^#[a-z\d_-]+$/
+  LABEL = "slack"
+  FIELDS += [
+    [:service_url, {
+      placeholder: 'Slack Hook URL (https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXX)',
+      label:       'Hook URL'
     }],
     [:room_id, {
-      :placeholder => '#general',
-      :label => 'Room where Slack should notify'
+      placeholder: '#general',
+      label:       'Notification channel',
+      hint:        'If empty Errbit will use the default channel for the webook'
     }]
   ]
 
+  # Make room_id optional in case users want to use the default channel
+  # setup on Slack when creating the webhook
   def check_params
-    if Fields.detect {|f| self[f[0]].blank? unless f[0] == :room_id }
-      errors.add :base, "You must specify your Slack subdomain and token."
+    if service_url.blank?
+      errors.add :service_url, "You must specify your Slack Hook url"
+    end
+
+    if room_id.present? && !CHANNEL_NAME_REGEXP.match(room_id)
+      errors.add :room_id, "Slack channel name must be lowercase, with no space, special character, or periods."
     end
   end
 
-  def url
-    "https://#{subdomain}.slack.com/services/hooks/incoming-webhook?token=#{api_token}"
-  end
-
   def message_for_slack(problem)
-    "[#{problem.app.name}][#{problem.environment}][#{problem.where}]: #{problem.error_class} #{problem_url(problem)}"
+    "[#{problem.app.name}][#{problem.environment}][#{problem.where}]: #{problem.error_class} #{problem.url}"
   end
 
   def post_payload(problem)
-    payload = {:text => message_for_slack(problem) }
-    payload[:channel] = room_id unless room_id.empty?
-    payload.to_json
+    {
+      username:    "Errbit",
+      icon_url:    "https://raw.githubusercontent.com/errbit/errbit/master/docs/notifications/slack/errbit.png",
+      channel:     room_id,
+      attachments: [
+        {
+          fallback:   message_for_slack(problem),
+          title:      problem.message.to_s.truncate(100),
+          title_link: problem.url,
+          text:       problem.where,
+          color:      "#D00000",
+          fields:     [
+            {
+              title: "Application",
+              value: problem.app.name,
+              short: true
+            },
+            {
+              title: "Environment",
+              value: problem.environment,
+              short: true
+            },
+            {
+              title: "Times Occurred",
+              value: problem.notices_count.try(:to_s),
+              short: true
+            },
+            {
+              title: "First Noticed",
+              value: problem.first_notice_at.try(:to_s, :db),
+              short: true
+            }
+          ]
+        }
+      ]
+    }.compact.to_json # compact to remove empty channel in case it wasn't selected by user
   end
 
   def create_notification(problem)
-    HTTParty.post(url, :body => post_payload(problem), :headers => { 'Content-Type' => 'application/json' })
+    HTTParty.post(
+      service_url,
+      body:    post_payload(problem),
+      headers: {
+        'Content-Type' => 'application/json'
+      }
+    )
+  end
+
+  def configured?
+    service_url.present?
   end
 end

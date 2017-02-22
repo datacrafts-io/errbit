@@ -1,15 +1,12 @@
-require 'spec_helper'
-
-describe 'users/show.html.haml', :type => :view do
-
+describe 'users/show.html.haml', type: 'view' do
   let(:user) do
-    stub_model(User, :created_at => Time.now, :email => "test@example.com")
+    stub_model(User, created_at: Time.zone.now, email: "test@example.com")
   end
 
   before do
-    allow(Errbit::Config).to receive(:github_authentication) { true }
-    allow(controller).to receive(:current_user) { stub_model(User) }
-    assign :user, user
+    allow(Errbit::Config).to receive(:github_authentication).and_return(true)
+    allow(controller).to receive(:current_user).and_return(stub_model(User))
+    allow(view).to receive(:user).and_return(user)
   end
 
   context 'with GitHub authentication' do
@@ -38,7 +35,7 @@ describe 'users/show.html.haml', :type => :view do
 
     context 'viewing own user page' do
       before do
-        allow(controller).to receive(:current_user) { user }
+        allow(controller).to receive(:current_user).and_return(user)
       end
 
       it 'shows link github button when no login or token' do
@@ -56,9 +53,13 @@ describe 'users/show.html.haml', :type => :view do
 
       it "should confirm the 'resolve' link by default" do
         render
-        expect(view.content_for(:action_bar)).to have_selector('a.delete[data-confirm="%s"]' % I18n.t('.users.confirm_delete'))
+        expect(view.content_for(:action_bar)).to have_selector(
+          format(
+            'a.delete[data-confirm="%s"]',
+            I18n.t('.users.confirm_delete')
+          )
+        )
       end
-
     end
   end
 end

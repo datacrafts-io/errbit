@@ -1,58 +1,23 @@
-## 0.6.0 - Not released Yet
+## 0.6.0
+https://github.com/errbit/errbit/issues?utf8=%E2%9C%93&q=milestone%3A0.6.0
 
-- Add turbolinks
-- Save back url when user login
-- Add tags and category_id for redmine
+## 0.5.0
+https://github.com/errbit/errbit/issues?utf8=%E2%9C%93&q=milestone%3A0.5.0
 
-By [@darkleaf](https://github.com/darkleaf)
+## 0.4.0
 
-## 0.5.0 - Not released Yet
+- #791 Fix double escaping of problem title in list view.(@felixbuenemann)
+- #790 Fix favicon location.(@felixbuenemann)
+- #716 Fix inline comments styles.(@oelmekki)
+- #778 Update to rails 4.1.(@arthurnn)
+- #682 Namespace fingerprint classes better.(@csaunders)
+- Drop ruby support for versions 1.9.x, and 2.0.x.(@arthurnn)
+- #773 Only leave GitHub issue tracker on vanila errbit, as the others could be
+  added just using the plugin.(@arthurnn)
+- #768 Update to Mongoid 4.0 and rails to 4.0 (@arthurnn)
+- #820 Environment-only configuration
 
-- Upgrade to rails 4.1.1
-- Add ransack
-- Add authority(ACL)
-- Counter cache by counter_culture gem
-- Gem decent_exposure is removed
-- Big refactoring for controllers: added inheritance hierarchy
-- Apps sorting made by ActiveRecord in AppsController
-- Fix some N+1 problems
-- Move commits from errbit/errbit. Last commit at Apr 23, 2014
-- Add user registration
-
-By [@darkleaf](https://github.com/darkleaf)
-
-## 0.4.0 - Not released Yet
-
-### Improvements
-
-- Migrate to PostgreSQL ([@realmyst][], [@numbata][], [@boblail][])
-- Add observers ([@darkleaf][])
-- Add sidekiq ([@darkleaf][])
-- Add ability to customize the hosting repository links (see Errbit::Config.repository_hostings) ([@darkleaf][])
-- Watcher can watch only the errors or only deploys or both ([@darkleaf][])
-- Add deploys atom feed ([@darkleaf][])
-- Add deploy page ([@darkleaf][])
-- Show code changes(with git submodules) between deploys in deploys feed and page ([@darkleaf][])
-- Update hoptoad_notifier to airbrake ([@darkleaf][])
-- Use 24hours time format ([@darkleaf][])
-- Show timezone on problem page ([@darkleaf][])
-- Redmine username and password are optional ([@darkleaf][])
-- Add app copy interactor ([@darkleaf][])
-- Receive notice without backtrace ([@seliverstov][])
-- Add conditions for display notify_all_users field ([@seliverstov][])
-- Add Year to deploy date output ([@seliverstov][])
-
-### Bug Fixes
-
-- Fix mistake in link_to_copy_attributes_from_other_app helper. ([@darkleaf][])
-
-[@realmyst]: https://github.com/realmyst
-[@numbata]: https://github.com/numbata
-[@boblail]: https://github.com/boblail
-[@darkleaf]: https://github.com/darkleaf
-[@seliverstov]: https://github.com/seliverstov
-
-## 0.3.0 - Not released Yet
+## 0.3.0
 
 ### Improvements
 

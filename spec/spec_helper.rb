@@ -1,6 +1,8 @@
 # This file is copied to ~/spec when you run 'ruby script/generate rspec'
 # from the project root directory.
-ENV["RAILS_ENV"] ||= 'test'
+ENV["RAILS_ENV"] = 'test'
+ENV["ERRBIT_LOG_LEVEL"] = 'fatal'
+ENV["ERRBIT_USER_HAS_USERNAME"] = 'false'
 
 if ENV['COVERAGE']
   require 'coveralls'
@@ -19,54 +21,43 @@ end
 
 require File.expand_path("../../config/environment", __FILE__)
 require 'rspec/rails'
-require 'database_cleaner'
-require 'webmock/rspec'
+require 'rspec/its'
+require 'email_spec'
 require 'xmpp4r'
 require 'xmpp4r/muc'
-require 'sidekiq/testing'
-
+require 'mongoid-rspec'
+require 'fabrication'
+require 'sucker_punch/testing/inline'
+require 'errbit_plugin/mock_issue_tracker'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
-
-Fabrication.configure do |config|
-  fabricator_dir = "spec/fabricators"
-end
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+Mongoid::Config.truncate!
+Mongoid::Tasks::Database.create_indexes
+ActionMailer::Base.delivery_method = :test
 
 RSpec.configure do |config|
-  config.infer_spec_type_from_file_location!
-  config.mock_with :rspec do |mocks|
-    mocks.yield_receiver_to_any_instance_implementation_blocks = false
+  config.include Devise::TestHelpers, type: :controller
+  config.include Mongoid::Matchers, type: :model
+  config.alias_example_to :fit, focused: true
+
+  config.before(:each) do
+    Mongoid::Config.truncate!
   end
 
-  config.include Devise::TestHelpers, :type => :controller
-  config.use_transactional_fixtures = false
-
-  config.include WebMock::API
-  Sidekiq::Testing.inline!
-
-  config.include Haml, :type => :helper
-  config.include Haml::Helpers, :type => :helper
-  config.before(:each, :type => :helper) do |config|
+  config.include Haml, type: :helper
+  config.include Haml::Helpers, type: :helper
+  config.before(:each, type: :helper) do |_|
     init_haml_helpers
   end
 
-  config.after(:all) do
-    WebMock.disable_net_connect! :allow => /coveralls\.io/
+  config.before(:each, type: :decorator) do |_|
+    Draper::ViewContext.current.class_eval { include Haml::Helpers }
+    Draper::ViewContext.current.instance_eval { init_haml_helpers }
   end
 
-  config.before(:suite) do
-    DatabaseCleaner.strategy = :deletion
-  end
-
-  config.around(:each) do |example|
-    DatabaseCleaner.cleaning do
-      example.run
-    end
-  end
+  config.infer_spec_type_from_file_location!
 end
 
 OmniAuth.config.test_mode = true
-
-ServiceLocator.differ = FakeDiffer

@@ -1,10 +1,11 @@
-require 'spec_helper'
+describe "apps/new.html.haml", type: 'view' do
+  let(:app) { stub_model(App) }
+  let(:app_decorate) { AppDecorator.new(app) }
 
-describe "apps/new.html.haml", :type => :view do
-  let(:app) { stub_model(App, name: 'app') }
   before do
-    assign :app, app
-    allow(controller).to receive(:current_user) { stub_model(User) }
+    allow(view).to receive(:app).and_return(app)
+    allow(view).to receive(:app_decorate).and_return(app_decorate)
+    allow(controller).to receive(:current_user).and_return(stub_model(User))
   end
 
   describe "content_for :action_bar" do
@@ -15,14 +16,15 @@ describe "apps/new.html.haml", :type => :view do
     it "should confirm the 'cancel' link" do
       render
 
-      expect(action_bar).to have_selector('a.button', :text => 'cancel')
+      expect(action_bar).to have_selector('a.button', text: 'cancel')
     end
-
   end
 
   context "with unvalid app" do
-    before do
-      app.errors.add(:base,'You must specify your')
+    let(:app) do
+      app = stub_model(App)
+      app.errors.add(:base, 'You must specify your')
+      app
     end
 
     it 'see the error' do
@@ -30,6 +32,4 @@ describe "apps/new.html.haml", :type => :view do
       expect(rendered).to match(/You must specify your/)
     end
   end
-
 end
-

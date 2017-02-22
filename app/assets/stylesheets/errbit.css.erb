@@ -36,7 +36,7 @@ a:hover   { color: #0069cc; text-decoration: underline; }
 a.action  { float: right; font-size: 0.9em;}
 
 #header > div, #content-wrapper, #footer {
-  width: 1000px;
+  width: 930px;
   margin: 0 auto;
   position: relative;
 }
@@ -59,7 +59,7 @@ a.action  { float: right; font-size: 0.9em;}
   position: absolute;
   top: 22px;
   left: 2px;
-  background: transparent url(<%= asset_path 'logo.png' %>) 0 0 no-repeat;
+  background: transparent url(<%= asset_path 'images/logo.png' %>) 0 0 no-repeat;
   text-indent: -5000em;
 }
 
@@ -93,9 +93,10 @@ a.action  { float: right; font-size: 0.9em;}
   padding: 0 14px;
   line-height: 30px;
 }
-#header #session-links #sign-out {
-  background: transparent url(<%= asset_path "icons/bullet-red-sm.png" %>) 12px 50% no-repeat;
-  padding-left: 29px;
+#header #session-links #sign-out i {
+  color: #cc0033;
+  font-size: 11px;
+  margin-right: 3px;
 }
 #header #session-links a:hover {
   text-decoration: none;
@@ -124,7 +125,7 @@ a.action  { float: right; font-size: 0.9em;}
 }
 #nav-bar li.active {
   border-color: #fff;
-  background: #FFF url(<%= asset_path "button-bg.png" %>) 0 -2px repeat-x;
+  background: #FFF url(<%= asset_path "images/button-bg.png" %>) 0 -2px repeat-x;
   border-width:1px 1px 0;
   margin-bottom:-2px;
   height: 37px;
@@ -133,10 +134,12 @@ a.action  { float: right; font-size: 0.9em;}
   color: #333;
 }
 
+#nav-bar li i {
+  margin-right: 5px;
+}
 #nav-bar li a {
   color: #666;
-  display: block;
-  padding: 0 20px 0 40px;
+  padding: 0 20px;
   font-size: 14px;
   font-weight: bold;
   line-height: 37px;
@@ -146,9 +149,6 @@ a.action  { float: right; font-size: 0.9em;}
   background: transparent 10px 6px no-repeat;
 }
 #nav-bar li a:hover { color: #666;}
-#nav-bar li.apps a { background-image: url(<%= asset_path "icons/briefcase.png" %>); }
-#nav-bar li.errs a { background-image: url(<%= asset_path "icons/error.png" %>); }
-#nav-bar li.users a { background-image: url(<%= asset_path "icons/user.png" %>); }
 #nav-bar li:not(.active):hover {
   box-shadow: 0 0 3px #69c;
   -moz-box-shadow: 0 0 3px #69c;
@@ -207,7 +207,7 @@ a.action  { float: right; font-size: 0.9em;}
   margin-bottom: 16px;
   text-decoration: none;
   color: #666;
-  background: #FFF url(<%= asset_path "button-bg.png" %>) 0 bottom repeat-x;
+  background: #FFF url(<%= asset_path "images/button-bg.png" %>) 0 bottom repeat-x;
   border-radius: 50px;
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
@@ -215,8 +215,7 @@ a.action  { float: right; font-size: 0.9em;}
 }
 #action-bar span a {
   color: #666;
-  display: block;
-  padding: 0 20px 0 40px;
+  padding: 0 20px;
   font-size: 14px; font-weight: bold; line-height: 39px; text-decoration: none;
   text-shadow: 1px 1px 0px #FFF; -webkit-text-shadow: 1px 1px 0px #FFF;
   background: transparent 10px 8px no-repeat;
@@ -227,17 +226,20 @@ a.action  { float: right; font-size: 0.9em;}
   -moz-box-shadow: 0 0 3px #69c;
   -webkit-box-shadow: 0 0 3px #69c;
 }
-#action-bar a.add {
-  background-image: url(<%= asset_path "icons/add.png" %>);
+#action-bar a i {
+  margin-right: 5px;
 }
 
-#action-bar .calendar_link {
-  background: url(<%= asset_path "icons/ical.png" %>) no-repeat scroll 12px 6px transparent;
-  padding-left: 47px;
+#action-bar span.github a:before { font-family: FontAwesome; content: "\f09b"; margin-right: 8px; position: relative; top: 4px; font-size: 26px; }
+#action-bar span.google a:before { font-family: FontAwesome; content: "\f1a0"; margin-right: 8px; position: relative; top: 4px; font-size: 26px; }
+
+#action-bar span a.issue-tracker-button {
+  padding-left: 5px;
 }
 
-#action-bar span.github a { background: url(<%= asset_path "icons/github.png" %>) no-repeat 6px 5px; }
-#action-bar span.unlink_github a { background: url(<%= asset_path "icons/unlink_github.png" %>) no-repeat 6px 5px; }
+#action-bar span a.issue-tracker-button img {
+  padding-left: 10px;
+}
 
 /* Content */
 #content {
@@ -272,15 +274,15 @@ a.action  { float: right; font-size: 0.9em;}
   border: 1px solid #6cf;
 }
 #flash-messages li.success {
-  background: #cfc url(<%= asset_path "icons/success.png" %>) 16px 50% no-repeat;
+  background: #cfc url(<%= asset_path "images/icons/success.png" %>) 16px 50% no-repeat;
   border: 1px solid #6c3;
 }
 #flash-messages li.error {
-  background: #fcc url(<%= asset_path "icons/error.png" %>)   16px 50% no-repeat;
+  background: #fcc url(<%= asset_path "images/icons/error.png" %>)   16px 50% no-repeat;
   border: 1px solid #f99;
 }
 #flash-messages .alert {
-  background: #ffc url(<%= asset_path "icons/warning.png" %>) 10px 7px no-repeat;
+  background: #ffc url(<%= asset_path "images/icons/warning.png" %>) 10px 7px no-repeat;
   border-color: #e4bb69;
 }
 
@@ -306,9 +308,9 @@ form label {
 }
 form label.inline { display: inline; }
 form .checkbox label { display: inline; }
-form .required label { padding-right: 20px; background: transparent url(<%= asset_path "icons/required.png" %>) right 50% no-repeat; }
+form .required label:after { font-family: FontAwesome; content: "\f069"; color: #cc0033; margin-left: 5px; font-weight: normal; }
 form .field_with_errors label { color: #900; }
-form input[type=text], form input[type=search], form input[type=password], form input[type=email] {
+form input[type=text], form input[type=password], form input[type=email] {
   width: 96%; padding: 0.8em;
   font-size: 1em;
   color: #787878; border: 1px solid #C6C6C6;
@@ -340,7 +342,7 @@ form input[type=submit].button {
 }
 form div.buttons {
   color: #666;
-  background: #FFF url(<%= asset_path "button-bg.png" %>) 0 bottom repeat-x;
+  background: #FFF url(<%= asset_path "images/button-bg.png" %>) 0 bottom repeat-x;
   border-radius: 50px;
   -moz-border-radius: 50px;
   -webkit-border-radius: 50px;
@@ -353,7 +355,7 @@ form div.buttons:hover {
   -moz-box-shadow: 0 0 3px #69c;
   -webkit-box-shadow: 0 0 3px #69c;
 }
-form div.buttons input, form div.buttons button, form div.buttons a {
+form div.buttons input, form div.buttons button {
   padding: 0 20px;
   color: #666;
   background: none;
@@ -365,14 +367,13 @@ form div.buttons input, form div.buttons button, form div.buttons a {
   -webkit-text-shadow: 1px 1px 0px #FFF;
   border: none;
 }
-form div.buttons button.sign_in {
-  padding-left: 40px;
-  background: transparent url(<%= asset_path "icons/right-arrow.png" %>) 3px 3px no-repeat;
+
+.sign_in:before {
+  font-family: FontAwesome;
+  content: "\f061";
+  margin-right: 8px;
 }
-form div.buttons a.register {
-    padding-left: 40px;
-    background: transparent url(<%= asset_path "icons/add.png" %>) 6px 6px no-repeat;
-}
+
 form strong.option {
   display: block;
   margin: 0.7em 0;
@@ -544,8 +545,8 @@ a.button.active {
   display: inline-block;
 }
 
-/* Watchers / Issue Tracker / Notification Forms */
-div.watcher.nested .watcher_params, div.issue_tracker.nested .tracker_params, div.notification_service.nested .notification_params {
+/* Issue Tracker / Notification Forms */
+div.issue_tracker.nested .tracker_params, div.notification_service.nested .notification_params {
   display: none;
 }
 
@@ -556,32 +557,61 @@ div.nested .choose {
   margin-bottom: 0.5em;
 }
 
-div.issue_tracker.nested .choose, div.notification_service.nested .choose  {
+div.issue_tracker.nested .choose {
   background-color: #ebebeb;
   border: 1px solid #dddddd;
   margin: 0 0 15px;
   padding: 12px;
 }
-div.issue_tracker.nested img, div.notification_service.nested img {
+
+div.notification_service.nested .choose  {
+  background-color: #ebebeb;
+  border: 1px solid #dddddd;
+  margin: 0 0 15px;
+  padding: 12px;
+
+}
+div.issue_tracker.nested img {
+  vertical-align: middle;
+}
+
+div.notification_service.nested img {
   vertical-align: middle;
 }
 
 /* Icons for Issue Tracker Radio Buttons */
-div.issue_tracker.nested label.label_radio, div.notification_service.nested label.label_radio  {
+div.issue_tracker.nested label.label_radio {
+  color: #929292;
+  margin-right: 8px;
+}
+
+div.notification_service.nested label.label_radio  {
   color: #929292;
   padding-left: 33px;
   margin-bottom: 6px;
   margin-right: 8px;
   line-height: 30px;
 }
-div.issue_tracker.nested .choose, div.notification_service.nested .choose {
+
+div.notification_service.nested .choose {
   padding-bottom: 6px;
 }
+
 div.issue_tracker.nested label.label_radio:hover, div.notification_service.nested label.label_radio:hover {
   color: #696969;
 }
-div.issue_tracker.nested .label_radio input, div.notification_service.nested .label_radio input {
+
+div.issue_tracker.nested .label_radio input {
+  display: none;
+}
+
+div.notification_service.nested .label_radio input {
   position: absolute; left: -9999px;
+}
+
+.button-icon {
+  float: left;
+  margin: 5px 0 0 6px;
 }
 
 div.issue_tracker.nested label.r_on, div.issue_tracker.nested label.r_on:hover, div.notification_service.nested label.r_on, div.notification_service.nested label.r_on:hover {
@@ -594,11 +624,11 @@ div.issue_tracker.nested label.r_on, div.issue_tracker.nested label.r_on:hover, 
 /* Apps Table */
 table.apps tbody tr:hover td ,table.errs tbody tr:hover td { background-color: #F2F2F2;}
 
-table.apps td.name, table.errs td.message { width: 100%; }
+table.apps td.name { width: 100%; }
 table.apps td { padding: 16px 20px; }
 table.apps th { padding: 10px 20px; }
 
-table.apps td.issue_tracker, table.apps td.count, table.apps td.deploy {
+table.apps td.issue_tracker, table.apps td.count {
   text-align: center;
 }
 table.apps td.issue_tracker, table.apps td.count {
@@ -609,9 +639,6 @@ table.apps td.issue_tracker img { vertical-align: top; }
 td.message .line {
   display:inline-block;
   margin-left:1em;
-}
-td.deploy {
-  white-space: nowrap;
 }
 td.latest {
   white-space: nowrap;
@@ -625,7 +652,7 @@ td.count, td.issue_link {
   padding: 0.1em 0.7em;
   margin-top: 3px;
   color: #fff;
-  background: #cc0033 url(<%= asset_path "error-badge-bg.png" %>) 0 bottom repeat-x;
+  background-color: #cc0033;
   border: 1px solid #900;
   border-radius: 18px;
   -moz-border-radius: 18px;
@@ -636,7 +663,7 @@ td.count, td.issue_link {
   -webkit-opacity: 0.8
 }
 .count a.resolved {
-  background: #05B81d url(<%= asset_path "resolved-badge-bg.png" %>) 0 bottom repeat-x;
+  background-color: #05B81d;
   border: 1px solid #080;
 }
 .count a:hover {
@@ -647,9 +674,12 @@ td.count, td.issue_link {
 }
 
 /* Err Tables */
-table.errs td.app {
-  padding-right: 2em;
-  width: 20%;
+table.errs td.app .name {
+  display: block;
+  width: 150px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 table.errs td.app .environment {
   font-size: 0.8em;
@@ -658,12 +688,10 @@ table.errs td.app .environment {
 table.errs td.message a {
   display: block;
   word-wrap: break-word;
-  /* PjpG - configuration in WHAT & WHERE table's columns using ellipsis to avoid oversizing table's width */
-    width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    -o-text-overflow: ellipsis;
-  /* ------ */
+  width: 440px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 table.errs td.message em {
   color: #727272;
@@ -698,29 +726,24 @@ table.tally th.value {
   text-transform: none;
 }
 
-/* Deploys table */
-table.deploys td.when {
-  width: 102px;
-}
-
 /* Resolve Errs */
-#action-bar a.resolve {
-  background: transparent url(<%= asset_path "icons/thumbs-up.png" %>) 6px 5px no-repeat;
+#action-bar .resolve:before {
+  font-family: FontAwesome;
+  content: "\f087";
+  margin-right: 5px;
 }
 
 /* Go Up */
-#action-bar a.up {
-  background: transparent url(<%= asset_path "icons/up.png" %>) 6px 5px no-repeat;
+#action-bar a.up:before {
+  font-family: FontAwesome;
+  content: "\f077";
+  margin-right: 5px;
 }
 
 /* Notices Pagination */
 .notice-pagination {
   float: left;
   margin-right: 10px;
-}
-
-.notice-pagination .date{
-  padding: 0 10px;
 }
 
 .notice-pagination-loader {
@@ -833,7 +856,7 @@ table.backtrace tr.padding th, table.backtrace tr.padding td {
   padding: 0;
 }
 
-h3#watchers_toggle, h3#repository_toggle, h3#deploys_toggle, h3#api_toggle {
+h3#watchers_toggle, h3#repository_toggle {
   cursor: pointer;
 }
 
@@ -841,7 +864,7 @@ span.click_span {
   font-size: 0.7em;
 }
 
-#deploys_div, #repository_div, #watchers_div, #api_div {
+#repository_div, #watchers_div {
   display: none;
 }
 
@@ -895,6 +918,9 @@ table.errs tr td.message .inline_comment {
   border: 1px solid #E2E2E2;
   text-shadow: 0 1px 0 #FAFAFA;
   font-style: normal;
+  word-wrap: break-word;
+  text-overflow: ellipsis;
+  width: 300px;
 }
 table.errs tr:hover td.message .inline_comment {
   background-color: #D5E0FA;
@@ -923,12 +949,4 @@ table.users td {
 table.users td img.gravatar {
   vertical-align: middle;
   margin-left: 3px;
-}
-
-dl dt {
-    font-weight: bold;
-}
-
-dl dd {
-    margin-left: 10px;
 }

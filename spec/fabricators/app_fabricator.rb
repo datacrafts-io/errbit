@@ -1,60 +1,21 @@
 Fabricator(:app) do
-  name { sequence(:app_name){|n| "App ##{n}"} }
+  name { sequence(:app_name) { |n| "App ##{n}" } }
   repository_branch 'master'
 end
 
-Fabricator(:app_with_watcher, :from => :app) do
-  after_create do |parent|
-    parent.watchers.create Fabricate.attributes_for(:watcher, :app => parent)
+Fabricator(:app_with_watcher, from: :app) do
+  watchers(count: 1) do |parent, _i|
+    Fabricate.build(:watcher, app: parent)
   end
-end
-
-Fabricator(:app_with_user_watcher, :from => :app) do
-  after_create do |parent|
-    parent.watchers.create Fabricate.attributes_for(:user_watcher, :app => parent)
-  end
-end
-
-Fabricator(:app_with_deploys, :from => :app) do
-  after_create { |parent|
-    3.times do
-      Fabricate(:deploy, :app => parent)
-    end
-  }
 end
 
 Fabricator(:watcher) do
   app
   watcher_type 'email'
-  email   { sequence(:email){|n| "email#{n}@example.com"} }
-
-  watching_errors true
-  watching_deploys true
+  email { sequence(:email) { |n| "email#{n}@example.com" } }
 end
 
-Fabricator(:watcher_of_errors, from: :watcher) do
-  watching_errors true
-  watching_deploys false
-end
-
-Fabricator(:watcher_of_deploys, from: :watcher) do
-  watching_errors false
-  watching_deploys true
-end
-
-Fabricator(:user_watcher, :from => :watcher) do
+Fabricator(:user_watcher, from: :watcher) do
   user
   watcher_type 'user'
-
-  watching_errors true
-  watching_deploys true
 end
-
-Fabricator(:deploy) do
-  app
-  username      'clyde.frog'
-  repository    'git@github.com/errbit/errbit.git'
-  environment   'production'
-  revision      { SecureRandom.hex(10) }
-end
-

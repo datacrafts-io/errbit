@@ -2,97 +2,73 @@
 # =============
 #
 # Copy this file to config/deploy.rb and customize it as needed.
-# Then run `cap deploy:setup` to set up your server and finally
+# Then run `cap errbit:setup` to set up your server and finally
 # `cap deploy` whenever you would like to deploy Errbit. Refer
-# to the Readme for more information.
+# to ./docs/deployment/capistrano.md for more info
 
-config = YAML.load_file('config/config.yml')['deployment'] || {}
+# config valid only for current version of Capistrano
+lock '3.4.0'
 
-require 'bundler/capistrano'
-require 'sidekiq/capistrano'
+set :application, 'errbit'
+set :repo_url, 'https://github.com/errbit/errbit.git'
+set :branch, ENV['branch'] || 'master'
+set :deploy_to, '/var/www/apps/errbit'
+set :keep_releases, 5
 
-load 'deploy/assets'
+set :pty, true
+set :ssh_options, forward_agent: true
 
-set :application, "errbit"
-set :repository,  config['repository']
+set :linked_files, fetch(:linked_files, []) + %w(
+  .env
+  config/newrelic.yml
+  config/puma.rb
+)
 
-role :web, config['hosts']['web']
-role :app, config['hosts']['app']
-role :db,  config['hosts']['db'], :primary => true
+set :linked_dirs, fetch(:linked_dirs, []) + %w(
+  log
+  tmp/cache tmp/pids tmp/sockets
+  vendor/bundle
+)
 
-set :user, config['user']
-set :use_sudo, false
-if config.has_key?('ssh_key')
-  set :ssh_options,      { :forward_agent => true, :keys => [ config['ssh_key'] ] }
-else
-  set :ssh_options,      { :forward_agent => true }
-end
-default_run_options[:pty] = true
-
-set :deploy_to, config['deploy_to']
-set :deploy_via, :remote_cache
-set :copy_cache, true
-set :copy_exclude, [".git"]
-set :copy_compression, :bz2
-
-set :scm, :git
-set :scm_verbose, true
-set :branch, config['branch'] || 'master'
-
-before 'deploy:assets:symlink', 'errbit:symlink_configs'
-# if unicorn is started through something like runit (the tool which restarts the process when it's stopped)
-# after 'deploy:restart', 'unicorn:stop'
-
-namespace :deploy do
-  task :start do ; end
-  task :stop do ; end
-  task :restart, :roles => :app, :except => { :no_release => true } do
-    run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-  end
-end
+# check out capistrano-rbenv documentation
+# set :rbenv_type, :system
+# set :rbenv_path, '/usr/local/rbenv'
+# set :rbenv_ruby, File.read(File.expand_path('../../.ruby-version', __FILE__)).strip
+# set :rbenv_roles, :all
 
 namespace :errbit do
-  task :setup_configs do
-    shared_configs = File.join(shared_path,'config')
-    run "mkdir -p #{shared_configs}"
-    run "if [ ! -f #{shared_configs}/config.yml ]; then cp #{latest_release}/config/config.example.yml #{shared_configs}/config.yml; fi"
-    run "if [ ! -f #{shared_configs}/mongoid.yml ]; then cp #{latest_release}/config/mongoid.example.yml #{shared_configs}/mongoid.yml; fi"
+  desc "Set up config files (first time setup)"
+  task :setup do
+    on roles(:app) do
+      execute "mkdir -p #{shared_path}/config"
+      execute "mkdir -p #{shared_path}/tmp/pids"
+      execute "touch #{shared_path}/.env"
 
-    # Generate unique secret token
-    run %Q{if [ ! -f #{shared_configs}/secret_token.rb ]; then
-      cd #{current_release};
-      echo "Errbit::Application.config.secret_token = '$(bundle exec rake secret)'" > #{shared_configs}/secret_token.rb;
-    fi}.compact
-  end
+      {
+        'config/newrelic.example.yml' => 'config/newrelic.yml'
+      }.each do |src, target|
+        unless test("[ -f #{shared_path}/#{target} ]")
+          upload! src, "#{shared_path}/#{target}"
+        end
+      end
 
-  task :symlink_configs do
-    errbit.setup_configs
-    shared_configs = File.join(shared_path,'config')
-    release_configs = File.join(release_path,'config')
-    run("ln -nfs #{shared_configs}/config.yml #{release_configs}/config.yml")
-    run("ln -nfs #{shared_configs}/mongoid.yml #{release_configs}/mongoid.yml")
-    run("ln -nfs #{shared_configs}/secret_token.rb #{release_configs}/initializers/__secret_token.rb")
+      invoke 'puma:config'
+    end
   end
 end
 
-namespace :unicorn do
-  set(:unicorn_pid) do
-    path = config['pids'] || "#{deploy_to}/shared/pids"
-    "`cat #{path}/unicorn.pid`"
-  end
-
-  desc 'Reload unicorn'
-  task :reload, :roles => :app, :except => { :no_release => true } do
-    run "kill -HUP #{unicorn_pid}"
-  end
-
-  desc 'Stop unicorn'
-  task :stop, :roles => :app, :except => { :no_release => true } do
-    run "kill -QUIT #{unicorn_pid}"
-  end
-
-  desc 'Reexecute unicorn'
-  task :reexec, :roles => :app, :except => { :no_release => true } do
-    run "kill -USR2 #{unicorn_pid}"
+namespace :db do
+  desc "Create and set up the mongo db"
+  task :setup do
+    on roles(:db) do
+      within current_path do
+        with rails_env: fetch(:rails_env) do
+          execute :rake, 'errbit:bootstrap'
+        end
+      end
+    end
   end
 end
+
+set :puma_conf, "#{shared_path}/config/puma.rb"
+set :puma_bind, 'tcp://0.0.0.0:8080'

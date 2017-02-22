@@ -1,12 +1,13 @@
-class Watcher < ActiveRecord::Base
-  include Authority::Abilities
+class Watcher
+  include Mongoid::Document
+  include Mongoid::Timestamps
 
+  field :email
 
-  belongs_to :app, :inverse_of => :watchers
+  embedded_in :app, inverse_of: :watchers
   belongs_to :user
 
   validate :ensure_user_or_email
-  validates :email, format: { with: Errbit::Config.email_regexp }, allow_blank: true, if: :email_changed?
 
   before_validation :clear_unused_watcher_type
 
@@ -24,20 +25,18 @@ class Watcher < ActiveRecord::Base
     user.try(:email) || email
   end
 
-  protected
+protected
 
-    def ensure_user_or_email
-      errors.add(:base, "You must specify either a user or an email address") unless user.present? || email.present?
+  def ensure_user_or_email
+    errors.add(:base, "You must specify either a user or an email address") unless user.present? || email.present?
+  end
+
+  def clear_unused_watcher_type
+    case watcher_type
+    when 'user'
+      self.email = nil
+    when 'email'
+      self.user = self.user_id = nil
     end
-
-    def clear_unused_watcher_type
-      case watcher_type
-      when 'user'
-        self.email = nil
-      when 'email'
-        self.user = self.user_id = nil
-      end
-    end
-
+  end
 end
-

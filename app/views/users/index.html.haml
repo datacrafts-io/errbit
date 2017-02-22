@@ -1,17 +1,22 @@
-- content_for :title, 'Users'
+- content_for :title, t('.title')
+- content_for :action_bar do
+  %span
+    = link_to(new_user_path) do
+      %i.fa.fa-plus-circle
+      = t('.new')
 
 %table.users
   %thead
     %tr
       - if Errbit::Config.use_gravatar
         %th
-      %th= sort_link @q, :name
+      %th= t('.name')
       - if Errbit::Config.user_has_username
-        %th= sort_link @q, :username
-      %th.main= sort_link @q, :email
-      %th= sort_link @q, :admin, 'Admin?'
+        %th= t('.username')
+      %th.main= t('.email')
+      %th= t('.admin')
   %tbody
-    - @users.each do |user|
+    - users.each do |user|
       %tr.user_list
         - if Errbit::Config.use_gravatar
           %td= gravatar_tag user.email, :s => 24
@@ -19,6 +24,6 @@
         - if Errbit::Config.user_has_username
           %td= user.username
         %td= user.email
-        %td= user.admin? ? 'Y' : 'N'
-= paginate @users
+        %td= user.admin? ? t('.admin_yes') : t('.admin_no')
+= paginate users
 

@@ -1,19 +1,21 @@
-class ResolvedProblemClearer
+require 'problem_destroy'
 
+class ResolvedProblemClearer
   ##
   # Clear all problem already resolved
   #
   def execute
-    nb_problem_resolved.tap { |nb|
+    nb_problem_resolved.tap do |nb|
       if nb > 0
         criteria.each do |problem|
-          problem.destroy
+          ProblemDestroy.new(problem).execute
         end
+        repair_database
       end
-    }
+    end
   end
 
-  private
+private
 
   def nb_problem_resolved
     @count ||= criteria.count
@@ -21,5 +23,9 @@ class ResolvedProblemClearer
 
   def criteria
     @criteria = Problem.resolved
+  end
+
+  def repair_database
+    Mongoid.default_client.command repairDatabase: 1
   end
 end

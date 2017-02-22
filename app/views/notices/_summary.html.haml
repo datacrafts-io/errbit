@@ -1,49 +1,46 @@
 .window
   %table.summary
     %tr
-      %th Message
-      -#%td.main.nowrap= message_graph(problem)
-      %td.main.nowrap
-        = render "problems/tally_table", rows: problem.message_distribution
+      %th= t('.message')
+      %td.main.nowrap= message_graph(problem)
     %tr
-      %th Error Class
+      %th= t('.error_class')
       %td= notice.error_class
     - if notice.request['url'].present?
       %tr
-        %th URL
+        %th= t('.url')
         %td.nowrap= link_to notice.request['url'], notice.request['url']
+      %tr
+        %th &nbsp;
+        %td= notice.to_curl
     %tr
-      %th Where
+      %th= t('.where')
       %td= notice.where
     %tr
-      %th Occurred
-      %td
-        = notice.created_at.to_s(:precise)
-        (#{notice.created_at.utc.to_s(:precise)})
+      %th= t('.occurred')
+      %td= notice.created_at.to_s(:precise)
     %tr
-      %th Similar
+      %th= t('.similar')
       %td= problem.notices_count - 1
     %tr
-      %th Browser
-      %td
-        = render "problems/tally_table", rows: problem.user_agent_distribution
+      %th= t('.browser')
+      %td= user_agent_graph(problem)
     %tr
-      %th Tenant
-      %td
-        = render "problems/tally_table", rows: problem.host_distribution
+      %th= t('.tenant')
+      %td= tenant_graph(problem)
     - if notice.server_environment && notice.server_environment["hostname"]
       %tr
-        %th App Server
+        %th= t('.app_server')
         %td= notice.server_environment && notice.server_environment["hostname"]
     - if notice.app_version.present?
       %tr
-        %th App Version
+        %th= t('.app_version')
         %td= notice.app_version
     - if notice.framework
       %tr
-        %th Framework
+        %th= t('.framework')
         %td= notice.framework
     %tr
-      %th Rel. Directory
+      %th= t('.relative_directory')
       %td= notice.server_environment && notice.server_environment["project-root"]
 

@@ -3,18 +3,27 @@ Fabricator(:problem) do
   comments { [] }
   error_class 'FooError'
   environment 'production'
-  fingerprint 'some-finger-print'
 end
 
-Fabricator(:problem_with_comments, :from => :problem) do
-  after_create { |parent|
+Fabricator(:problem_with_comments, from: :problem) do
+  after_create do |parent|
     3.times do
-      Fabricate(:comment, :problem => parent)
-      parent.comments(true)
+      Fabricate(:comment, err: parent)
     end
-  }
+  end
 end
 
-Fabricator(:problem_resolved, :from => :problem) do
-  state_event :resolve
+Fabricator(:problem_with_errs, from: :problem) do
+  after_create do |parent|
+    3.times do
+      Fabricate(:err, problem: parent)
+    end
+  end
+end
+
+Fabricator(:problem_resolved, from: :problem) do
+  after_create do |pr|
+    Fabricate(:notice, err: Fabricate(:err, problem: pr))
+    pr.resolve!
+  end
 end

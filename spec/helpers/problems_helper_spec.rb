@@ -1,15 +1,4 @@
-require 'spec_helper'
-
-describe ProblemsHelper, :type => :helper do
-  describe '#truncated_problem_message' do
-    it 'is html safe' do
-      problem = double('problem', :message => '#<NoMethodError: ...>')
-      truncated = helper.truncated_problem_message(problem)
-      expect(truncated).to be_html_safe
-      expect(truncated).to_not include('<', '>')
-    end
-  end
-
+describe ProblemsHelper do
   describe "#gravatar_tag" do
     let(:email) { "gravatar@example.com" }
     let(:email_hash) { Digest::MD5.hexdigest email }
@@ -23,12 +12,12 @@ describe ProblemsHelper, :type => :helper do
 
       it "should render image_tag with correct alt and src" do
         expected = "<img alt=\"#{email}\" class=\"gravatar\" src=\"#{base_url}?d=identicon&amp;s=48\" />"
-        expect(helper.gravatar_tag(email, :s => 48)).to eq(expected)
+        expect(helper.gravatar_tag(email, s: 48)).to eq(expected)
       end
 
       it "should override :d" do
         expected = "<img alt=\"#{email}\" class=\"gravatar\" src=\"#{base_url}?d=retro&amp;s=48\" />"
-        expect(helper.gravatar_tag(email, :d => 'retro', :s => 48)).to eq(expected)
+        expect(helper.gravatar_tag(email, d: 'retro', s: 48)).to eq(expected)
       end
     end
 
@@ -62,7 +51,7 @@ describe ProblemsHelper, :type => :helper do
       let(:email_hash) { Digest::MD5.hexdigest email }
 
       it "should return the http url" do
-        allow_any_instance_of(ActionController::TestRequest).to receive_messages :ssl? => true
+        allow(controller.request).to receive(:ssl?).and_return(true)
         expect(helper.gravatar_url(email)).to eq("https://secure.gravatar.com/avatar/#{email_hash}?d=identicon")
       end
     end

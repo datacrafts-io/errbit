@@ -1,6 +1,4 @@
-require 'spec_helper'
-
-describe "Callback on Comment" do
+describe "Callback on Comment", type: 'model' do
   context 'when a Comment is saved' do
     let(:comment) { Fabricate.build(:comment) }
 
@@ -9,7 +7,8 @@ describe "Callback on Comment" do
 
       it 'should send an email notification' do
         expect(Mailer).to receive(:comment_notification).
-          and_return(double('email', :deliver => true))
+          with(comment).
+          and_return(double('email', deliver_now: true))
         comment.save
       end
     end

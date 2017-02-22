@@ -1,53 +1,14 @@
 - content_for :title, t('.title')
 - content_for :action_bar do
-  %span= link_to(t('.new_app'), new_app_path, :class => 'add') if current_user.admin?
+  - if current_user.admin?
+    %span
+      = link_to(new_app_path) do
+        %i.fa.fa-plus-circle
+        = t('.new_app')
 
-%table.apps
-  %thead
-    %tr
-      %th= sort_link @q, :name, t('.name')
-      - if any_repo_urls?
-        %th= t('.repository')
-      - if any_notification_services?
-        %th= t('.notify_html')
-      - if any_issue_trackers?
-        %th= t('.tracker')
-      - if any_deploys?
-        %th= t('.last_deploy')
-      %th= sort_link @q, :unresolved_problems_count, t('.errors')
-  %tbody
-    - @apps.each do |app|
-      %tr
-        %td.name= link_to app.name, app_path(app)
-        - if any_repo_urls?
-          %td.github_repo
-            = link_to_repository(app.repo_url) if app.repo_url?
-        - if any_notification_services?
-          %td.notification_service
-            - if app.notification_service_configured?
-              - notification_service_img = image_tag("#{app.notification_service.label}_goto.png")
-              - if app.notification_service.url
-                = link_to( notification_service_img, app.notification_service.url, :target => "_blank" )
-              - else
-                = notification_service_img
-        - if any_issue_trackers?
-          %td.issue_tracker
-            - if app.issue_tracker_configured?
-              - tracker_img = image_tag("#{app.issue_tracker.label}_goto.png")
-              - if app.issue_tracker.url
-                = link_to( tracker_img, app.issue_tracker.url )
-              - else
-                = tracker_img
-        - if any_deploys?
-          %td.deploy
-            - if app.last_deploy_at
-              - revision = app.last_deploy.short_revision
-              = link_to( app.last_deploy_at.to_s(:micro) << (revision.present? ? " (#{revision})" : ""), app_deploys_path(app))
-        %td.count
-          - if app.unresolved_problems_count > 0
-            = link_to app.unresolved_problems_count, app_path(app)
-    - if @apps.none?
-      %tr
-        %td{:colspan => 3}
-          %em
-            = t('.no_apps')
+%section
+  = render 'apps/search'
+%br
+%section
+  #app_table.app_table
+    = render 'apps/table'

@@ -1,62 +1,34 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 4.1.1'
+RAILS_VERSION = '~> 4.2.5.2'
 
-gem 'pg'
-gem 'counter_culture'
-gem 'after_commit_action'
-gem 'ransack'
-gem 'rails-observers'
+send :ruby, ENV['GEMFILE_RUBY_VERSION'] if ENV['GEMFILE_RUBY_VERSION']
 
-gem 'redis-objects'
-gem "redis", require: ["redis", "redis/connection/hiredis"]
-gem 'hiredis'
+gem 'actionmailer', RAILS_VERSION
+gem 'actionpack', RAILS_VERSION
+gem 'railties', RAILS_VERSION
 
-gem 'devise'
-gem 'authority'
-
-gem 'haml'
-gem 'jbuilder'
-gem 'htmlentities'
-gem 'rack-ssl', :require => 'rack/ssl'   # force SSL
-
-gem 'useragent'
 gem 'actionmailer_inline_css'
-gem 'kaminari', '>= 0.14.1'
-gem 'rack-ssl-enforcer', :require => false
-gem 'fabrication'
+gem 'decent_exposure'
+gem 'devise', '~> 3.5.5'
+gem 'dotenv-rails'
+gem 'draper'
+gem 'errbit_plugin'
+gem 'errbit_github_plugin'
+gem 'font-awesome-rails'
+gem 'haml'
+gem 'htmlentities'
+gem 'kaminari', '>= 0.16.3'
+gem 'mongoid', '5.0.2'
+gem 'mongoid_rails_migrations'
+gem 'rack-ssl', require: 'rack/ssl' # force SSL
+gem 'rack-ssl-enforcer', require: false
 gem 'rails_autolink'
-# Please don't update airbrake.
+gem 'useragent'
+
+# Please don't update hoptoad_notifier to airbrake.
 # It's for internal use only, and we monkeypatch certain methods
-gem 'airbrake', '3.1.15'
-
-# Need for mongodb data import
-gem 'mongo', :require => false
-gem 'bson_ext', :require => false
-
-# Remove / comment out any of the gems below if you want to disable
-# a given issue tracker, notification service, or authentication.
-
-# Issue Trackers
-# ---------------------------------------
-# Lighthouse
-gem 'lighthouse-api'
-# Redmine
-gem 'oruen_redmine_client', :require => 'redmine_client'
-# Pivotal Tracker
-gem 'pivotal-tracker'
-# Fogbugz
-gem 'ruby-fogbugz', :require => 'fogbugz'
-# Github Issues
-gem 'octokit', '~> 2.0'
-# Gitlab
-gem 'gitlab', '~> 3.0.0'
-
-# Bitbucket Issues
-gem 'bitbucket_rest_api', :require => false
-
-# Jira
-gem 'jira-ruby', :require => 'jira'
+gem 'hoptoad_notifier', "~> 2.4"
 
 # Notification services
 # ---------------------------------------
@@ -64,7 +36,7 @@ gem 'campy'
 # Hipchat
 gem 'hipchat'
 # Google Talk
-gem 'xmpp4r', :require => ["xmpp4r", "xmpp4r/muc"]
+gem 'xmpp4r', require: ["xmpp4r", "xmpp4r/muc"]
 # Hoiio (SMS)
 gem 'hoi'
 # Pushover (iOS Push notifications)
@@ -78,66 +50,69 @@ gem 'flowdock'
 # ---------------------------------------
 # GitHub OAuth
 gem 'omniauth-github'
+# Google OAuth
+gem 'omniauth-google-oauth2'
 
 gem 'ri_cal'
-gem 'yajl-ruby', :require => "yajl"
-gem 'sidekiq'
-gem 'sinatra', :require => false
-gem 'state_machine', github: 'seuros/state_machine'
-gem 'git'
-
-gem 'rinku', require: 'rails_rinku'
+gem 'yajl-ruby', platform: 'ruby'
+gem 'json', platform: 'jruby'
 
 group :development, :test do
-  gem 'rspec-rails'
-  gem 'webmock', :require => false
+  gem 'airbrake', '~> 4.3.5', require: false
   gem 'pry-rails'
-#  gem 'rpm_contrib'
-#  gem 'newrelic_rpm'
+  gem 'pry-byebug', platforms: [:mri]
   gem 'quiet_assets'
+  gem 'rubocop', require: false
 end
 
 group :development do
-  gem 'capistrano', '~> 2.0', :require => false
-  gem 'capistrano-sidekiq'
-  gem 'rvm-capistrano'
+  gem 'capistrano',         require: false
+  gem 'capistrano-bundler', require: false
+  gem 'capistrano-rails',   require: false
+  gem 'capistrano-rbenv',   require: false
+  gem 'capistrano3-puma',   require: false
+
 
   # better errors
   gem 'better_errors'
-  gem 'binding_of_caller'
+  gem 'binding_of_caller', platform: 'ruby'
   gem 'meta_request'
-  gem 'foreman', :require => false
-
-  # Use puma for development
-  gem 'puma', :require => false
-
 end
 
 group :test do
+  gem 'rspec', '~> 3.3'
+  gem 'rspec-rails', '~> 3.0', require: false
+  gem 'rspec-activemodel-mocks'
+  gem 'rspec-its'
+  gem 'mongoid-rspec', '~> 3.0.0', require: false
+  gem 'fabrication'
   gem 'capybara'
+  gem 'poltergeist'
+  gem 'phantomjs'
   gem 'launchy'
-  gem 'database_cleaner'
   gem 'email_spec'
   gem 'timecop'
   gem 'coveralls', require: false
-  gem "fakeredis", require: 'fakeredis/rspec'
-
-  #legacy
-  gem 'rspec-its'
-  gem 'rspec-activemodel-mocks'
 end
 
 group :heroku, :production do
-  gem 'unicorn', :require => false
-  gem 'newrelic_rpm'
+  gem 'rails_12factor', require: ENV.key?("HEROKU")
 end
 
-gem 'execjs'
-gem 'therubyracer', :platform => :ruby  # C Ruby (MRI) or Rubinius, but NOT Windows
-gem 'uglifier',     '>= 1.0.3'
+group :no_docker, :test, :development do
+ gem 'therubyracer', :platform => :ruby # C Ruby (MRI) or Rubinius, but NOT Windows
+end
+
+gem 'puma'
+gem 'sass-rails'
+gem 'uglifier'
 # We can't upgrade because not compatible to jquery >= 1.9.
 # To do that, we need fix the rails.js
 gem 'jquery-rails', '~> 2.1.4'
+gem 'pjax_rails'
 gem 'underscore-rails'
-gem 'turbolinks'
-gem 'jquery-turbolinks'
+
+gem 'sucker_punch'
+
+ENV['USER_GEMFILE'] ||= './UserGemfile'
+eval_gemfile ENV['USER_GEMFILE'] if File.exist?(ENV['USER_GEMFILE'])
