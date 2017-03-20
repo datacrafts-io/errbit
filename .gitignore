@@ -20,3 +20,7 @@ coverage
 *#
 .ruby-version
 NOTES
+
+# Vagrant configuration
+Vagrantfile
+.vagrant

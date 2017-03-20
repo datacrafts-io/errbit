@@ -1,0 +1,32 @@
+# encoding: utf-8
+
+Vagrant.configure(2) do |config|
+  config.vm.box = 'leopard/rwprecise64'
+
+  config.vm.provider 'virtualbox' do |v|
+    v.memory = 1500
+    v.cpus = 1
+    v.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 5000]
+  end
+
+  config.vm.network :forwarded_port, guest: 3000, host: 3000
+  config.vm.network :forwarded_port, guest: 1080, host: 1080
+
+  config.ssh.forward_agent = true
+
+  config.vm.network :private_network, ip: '192.168.47.16'
+
+  config.vm.synced_folder(
+    '.', '/vagrant', type: 'nfs', nfs_version: 3, create: true, mount_options: ['nolock,noatime']
+  )
+
+  $setupEnv = <<SCRIPT
+echo "cd /vagrant" >> /home/vagrant/.bashrc
+echo "export DEV_VAGRANT=true" >> /home/vagrant/.bashrc
+echo "[[ -s \"$HOME/.rvm/scripts/rvm\" ]] && . \"$HOME/.rvm/scripts/rvm\"" >> /home/vagrant/.profile
+SCRIPT
+
+  config.vm.provision :shell, inline: $setupEnv
+
+  config.vm.provision :shell, inline: 'mailcatcher --http-ip 0.0.0.0', run: 'always', privileged: false
+end
