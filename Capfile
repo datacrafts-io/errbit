@@ -4,7 +4,7 @@ require 'capistrano/deploy'
 require 'capistrano/rbenv' if ENV['rbenv']
 require 'capistrano/rvm'
 require 'capistrano/bundler'
-require 'capistrano/rails/assets'
+require 'capistrano/rails'
 require 'capistrano/puma'
 install_plugin Capistrano::Puma
 require "capistrano/scm/git"
