@@ -72,6 +72,8 @@ en:
     omniauth_callbacks:
       failure: "Could not authenticate you from %{kind} because \"%{reason}\"."
       success: "Successfully authenticated from %{kind} account."
+    google_login:
+      domain_unauthorized: "Account's email domain is not authorized for login. Please log in with an account from a trusted domain."
     sessions:
       new:
         sign_in: "Sign in"
@@ -143,14 +145,14 @@ en:
       name: Name
       email: Email
       entries: Entries per page
-      time_zone: Time Zone 
+      time_zone: Time Zone
       password: Password
       password_confirmation: Password Confirmation
       admin: Admin?
     new:
       title: New User
       cancel: cancel
-      add_user: Adicionar usuário
+      add_user: Add User
     show:
       name: Name
       email: Email
@@ -250,7 +252,7 @@ en:
       occurred: Occurred
       similar: Similar
       browser: Browser
-      tenant: Origem
+      tenant: Origin
       app_server: App Server
       app_version: App Version
       framework: Framework

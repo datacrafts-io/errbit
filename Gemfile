@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-RAILS_VERSION = '~> 4.2.5.2'
+RAILS_VERSION = '~> 4.2.9'
 
 send :ruby, ENV['GEMFILE_RUBY_VERSION'] if ENV['GEMFILE_RUBY_VERSION']
 
@@ -10,7 +10,7 @@ gem 'railties', RAILS_VERSION
 
 gem 'actionmailer_inline_css'
 gem 'decent_exposure'
-gem 'devise', '~> 3.5.5'
+gem 'devise', '~> 4.4.0'
 gem 'dotenv-rails'
 gem 'draper'
 gem 'errbit_plugin'
@@ -72,16 +72,15 @@ group :development do
   gem 'capistrano-rails',   require: false
   gem 'capistrano3-puma',   require: false
   gem 'capistrano-rvm',     require: false
-
-  # better errors
   gem 'better_errors'
   gem 'binding_of_caller', platform: 'ruby'
   gem 'meta_request'
 end
 
 group :test do
-  gem 'rspec', '~> 3.3'
-  gem 'rspec-rails', '~> 3.0', require: false
+  gem 'rake'
+  gem 'rspec', '~> 3.5'
+  gem 'rspec-rails', '~> 3.5', require: false
   gem 'rspec-activemodel-mocks'
   gem 'rspec-its'
   gem 'mongoid-rspec', '~> 3.0.0', require: false
@@ -100,7 +99,7 @@ group :heroku, :production do
 end
 
 group :no_docker, :test, :development do
- gem 'therubyracer', :platform => :ruby # C Ruby (MRI) or Rubinius, but NOT Windows
+  gem 'therubyracer', platform: :ruby # C Ruby (MRI) or Rubinius, but NOT Windows
 end
 
 gem 'puma'

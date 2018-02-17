@@ -1,8 +1,11 @@
 FROM ruby:2.3.3-alpine
-MAINTAINER David Papp <david@ghostmonitor.com>
+LABEL maintainer="David Papp <david@ghostmonitor.com>"
 
-RUN addgroup -S errbit \
-  && adduser -S -D -s /bin/false -G errbit -g errbit errbit
+ARG UID=101
+ARG GID=101
+
+RUN addgroup -g $GID -S errbit \
+  && adduser -u $UID -S -D -s /bin/false -G errbit -g errbit errbit
 
 # throw errors if Gemfile has been modified since Gemfile.lock
 RUN echo "gem: --no-document" >> /etc/gemrc \
@@ -12,11 +15,11 @@ RUN echo "gem: --no-document" >> /etc/gemrc \
 
 RUN mkdir -p /app \
   && chown -R errbit:errbit /app \
-  && chmod 700 /app/
+  && chmod 705 /app/
 WORKDIR /app
 
-RUN gem update --system \
-  && gem install bundler \
+RUN gem update --system 2.7.4 \
+  && gem install bundler --version 1.16.1 \
   && apk add --no-cache \
     curl \
     less \
@@ -45,6 +48,6 @@ RUN chown -R errbit:errbit /app
 
 USER errbit
 
-HEALTHCHECK CMD curl --fail http://localhost:$PORT/users/sign_in || exit 1
+HEALTHCHECK CMD curl --fail "http://$(/bin/hostname -i | /usr/bin/awk '{ print $1 }'):8080/users/sign_in" ||  exit 1
 
 CMD ["bundle","exec","puma","-C","config/puma.default.rb"]

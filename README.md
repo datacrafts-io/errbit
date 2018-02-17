@@ -19,29 +19,29 @@ Airbrake, you can just point the `airbrake` gem to your Errbit server.
 <table>
   <tr>
     <td align="center">
-      <a href="http://errbit.github.com/errbit/images/apps.png" target="_blank" title="Apps">
-        <img src="http://errbit.github.com/errbit/images/apps_thumb.png" alt="Apps">
+      <a href="https://errbit.com/images/apps.png" target="_blank" title="Apps">
+        <img src="https://errbit.com/images/apps_thumb.png" alt="Apps">
       </a>
       <br />
       <em>Apps</em>
     </td>
     <td align="center">
-      <a href="http://errbit.github.com/errbit/images/app_errors.png" target="_blank" title="Errors">
-        <img src="http://errbit.github.com/errbit/images/app_errors_thumb.png" alt="Errors">
+      <a href="https://errbit.com/images/app_errors.png" target="_blank" title="Errors">
+        <img src="https://errbit.com/images/app_errors_thumb.png" alt="Errors">
       </a>
       <br />
       <em>Errors</em>
     </td>
     <td align="center">
-      <a href="http://errbit.github.com/errbit/images/error_summary.png" target="_blank" title="Error Summary">
-        <img src="http://errbit.github.com/errbit/images/error_summary_thumb.png" alt="Error Summary">
+      <a href="https://errbit.com/images/error_summary.png" target="_blank" title="Error Summary">
+        <img src="https://errbit.com/images/error_summary_thumb.png" alt="Error Summary">
       </a>
       <br />
       <em>Error Summary</em>
     </td>
     <td align="center">
-      <a href="http://errbit.github.com/errbit/images/error_backtrace.png" target="_blank" title="Error Backtraces">
-        <img src="http://errbit.github.com/errbit/images/error_backtrace_thumb.png" alt="Error Backtraces">
+      <a href="https://errbit.com/images/error_backtrace.png" target="_blank" title="Error Backtraces">
+        <img src="https://errbit.com/images/error_backtrace_thumb.png" alt="Error Backtraces">
       </a>
       <br />
       <em>Error Backtraces</em>
@@ -59,8 +59,8 @@ updates and notifications.
 
 The list of requirements to install Errbit are:
 
-* Ruby 2.1.0 or higher
-* MongoDB 2.6.0 or higher
+* Ruby 2.3.x-2.4.x (>= 2.5.x not yet supported)
+* MongoDB 3.2.x-3.4.x (>= 3.6.x not yet supported)
 
 Installation
 ------------
